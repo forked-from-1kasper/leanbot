@@ -5,7 +5,13 @@ def server : string := "irc.mozilla.org"
 def port : string := "6667"
 
 def ident : string := "lean"
+
 def bot_nickname : string := "leanbot"
+
+theorem bot_nickname_is_correct : bot_nickname.front ≠ '#' :=
+begin
+  intros contra, cases contra
+end
 
 /-
 def wait (time : string) : io unit := do
@@ -44,16 +50,34 @@ match input with
 | _ := []
 end
 
-theorem ping_pong_is_correct : ∀ (nick ident subject: string)
-  (on_channel : subject.front = '#'),
+theorem ping_pong_is_correct_on_channel (nick ident subject: string)
+  (on_channel : subject.front = '#') :
   (ping_pong $ irc_text.parsed_normal
-    { object := ~nick!ident, type := message.privmsg,
-      subject := subject, text := "ping" }) =
+    { object := ~nick!ident,
+      type := message.privmsg,
+      subject := subject,
+      text := "ping" }) =
   [irc_text.parsed_normal
     { object := person.unidentified bot_nickname,
       type := message.privmsg,
-      subject := subject, text := sformat! "{nick}, pong" }] := begin
+      subject := subject,
+      text := sformat! "{nick}, pong" }] := begin
   intros, simp [ping_pong], rw [on_channel], trivial
+end
+
+theorem ping_pong_is_correct_on_priv (nick ident subject: string)
+  (not_on_channel : subject = bot_nickname):
+  (ping_pong $ irc_text.parsed_normal
+    { object := ~nick!ident,
+      type := message.privmsg,
+      subject := bot_nickname,
+      text := "ping" }) =
+  [irc_text.parsed_normal
+    { object := person.unidentified bot_nickname,
+      type := message.privmsg,
+      subject := nick,
+      text := sformat! "{nick}, pong" }] := begin
+  intros, simp [ping_pong], simp [bot_nickname_is_correct]
 end
 
 def my_bot : bot :=

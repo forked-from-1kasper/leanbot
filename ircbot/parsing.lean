@@ -27,7 +27,8 @@ def MessageType : parser message :=
 (tok "PRIVMSG" >> return message.privmsg) <|>
 (tok "MODE" >> return message.mode) <|>
 (tok "QUIT" >> return message.quit) <|>
-(tok "NICK" >> return message.nick)
+(tok "NICK" >> return message.nick) <|>
+(tok "JOIN" >> return message.join)
 
 def PersonIdentified : parser person := do
   nick ← many_char1 $ sat (λ c, c ≠ ' ' ∧ c ≠ '!'),
@@ -58,7 +59,7 @@ def NormalMessage : parser irc_text := do
     (λ c, c ≠ char.of_nat 10 ∧ c ≠ char.of_nat 13),
   optional Nl,
   pure $ irc_text.parsed_normal
-    { object := object, type := type,
+    { object := some object, type := type,
       subject := subject, text := text.as_string }
 
 end parsing

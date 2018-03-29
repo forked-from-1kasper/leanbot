@@ -1,7 +1,7 @@
 namespace types
 
 inductive message : Type
-| notice | privmsg | mode | quit | nick
+| notice | privmsg | mode | quit | nick | join
 
 inductive person : Type
 | unidentified : string → person
@@ -9,7 +9,7 @@ inductive person : Type
 notation `~` nick `!` ident := person.user nick ident
 
 structure normal_message :=
-(object : person)
+(object : option person)
 (type : message)
 (subject : string)
 (text : string)
@@ -26,6 +26,7 @@ match m with
 | message.mode := "MODE"
 | message.quit := "QUIT"
 | message.nick := "NICK"
+| message.join := "JOIN"
 end⟩
 
 inductive irc_text : Type
@@ -34,7 +35,7 @@ inductive irc_text : Type
 | ping : string → irc_text
 
 instance normal_message.has_to_string : has_to_string normal_message :=
-⟨λ s, sformat! "{to_string s.type} {s.subject} :{s.text}\n"⟩
+⟨λ s, sformat! "{to_string s.type} {s.subject} {s.text}\n"⟩
 
 instance irc_text.has_to_string : has_to_string irc_text :=
 ⟨λ it,

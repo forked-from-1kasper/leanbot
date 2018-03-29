@@ -32,10 +32,8 @@ end
 def ping_pong (input : irc_text) : list irc_text :=
 match input with
 | irc_text.parsed_normal
-  { object := ~nick!ident,
-    type := message.privmsg,
-    subject := subject,
-    text := "ping" } :=
+  { object := ~nick!ident, type := message.privmsg,
+    subject := subject, text := "ping" } :=
   [irc_text.parsed_normal
     { object := person.unidentified bot_nickname,
       type := message.privmsg,
@@ -44,6 +42,18 @@ match input with
         else nick,
       text := sformat! "{nick}, pong" }]
 | _ := []
+end
+
+theorem ping_pong_is_correct : ∀ (nick ident subject: string),
+  subject.front = '#' →
+  (ping_pong $ irc_text.parsed_normal
+    { object := ~nick!ident, type := message.privmsg,
+      subject := subject, text := "ping" }) =
+  [irc_text.parsed_normal
+    { object := person.unidentified bot_nickname,
+      type := message.privmsg,
+      subject := subject, text := sformat! "{nick}, pong" }] := begin
+  intros, simp [ping_pong], rw [a], trivial
 end
 
 def my_bot : bot :=

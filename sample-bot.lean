@@ -44,8 +44,8 @@ match input with
 | _ := []
 end
 
-theorem ping_pong_is_correct : ∀ (nick ident subject: string),
-  subject.front = '#' →
+theorem ping_pong_is_correct : ∀ (nick ident subject: string)
+  (on_channel : subject.front = '#'),
   (ping_pong $ irc_text.parsed_normal
     { object := ~nick!ident, type := message.privmsg,
       subject := subject, text := "ping" }) =
@@ -53,7 +53,7 @@ theorem ping_pong_is_correct : ∀ (nick ident subject: string),
     { object := person.unidentified bot_nickname,
       type := message.privmsg,
       subject := subject, text := sformat! "{nick}, pong" }] := begin
-  intros, simp [ping_pong], rw [a], trivial
+  intros, simp [ping_pong], rw [on_channel], trivial
 end
 
 def my_bot : bot :=

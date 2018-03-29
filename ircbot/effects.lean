@@ -4,7 +4,7 @@ import data.buffer.parser
 import ircbot.types
 import ircbot.parsing
 
-namespace io
+namespace effects
 
 open parser
 open parsing
@@ -56,7 +56,7 @@ structure bot :=
 (port : string)
 (funcs : list (irc_text → list irc_text))
 
-def bot_main (bt : bot) : io unit := do
+def mk_bot (bt : bot) : io unit := do
   proc ← io.proc.spawn { cmd := network_provider,
                          args := [bt.server, bt.port],
                          stdin := io.process.stdio.piped,
@@ -72,4 +72,4 @@ def bot_main (bt : bot) : io unit := do
   io.forever $ loop bt.funcs proc,
   io.put_str "* OK"
 
-end io
+end effects

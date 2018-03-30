@@ -1,25 +1,41 @@
 import system.io
 import data.buffer.parser
 
-import ircbot.types
-import ircbot.parsing
+import ircbot.types ircbot.parsing ircbot.support
 
 namespace effects
 
 open parser
-open parsing
-open types
+open parsing types support
 
 notation x `&` f := f x
 
 def network_provider : string := "nc"
+
+def date_provider := "date"
+def get_date : io $ option date := do
+  date_proc ← io.proc.spawn
+    { cmd := date_provider,
+      args := [date_format],
+      stdin := io.process.stdio.piped,
+      stdout := io.process.stdio.piped },
+  unparsed_date_io ← io.fs.get_line date_proc.stdout,
+
+  io.fs.close date_proc.stdout,
+  io.proc.wait date_proc,
+
+  let unparsed := buffer.to_string unparsed_date_io,
+  match run_string DateParser unparsed with
+  | (sum.inr v) := pure $ some v
+  | _ := pure none
+  end
 
 def wrapped_put (h : io.handle) (s : string) : io unit := do
   io.fs.put_str h s,
   io.fs.flush h,
   io.put_str $ sformat! "+ {s}"
 
-def loop (funcs : list (irc_text → list irc_text))
+def loop (bt : bot)
          (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
   let line := buffer.to_string getted_buffer,
@@ -34,7 +50,8 @@ def loop (funcs : list (irc_text → list irc_text))
       | (sum.inr v) := v
       | _ := irc_text.raw_text line
       end in
-    list.map (λ (f : irc_text → list irc_text), f text) funcs &
+    list.map (λ (f : irc_text → list irc_text), f text)
+             bt.funcs &
     list.join &
     list.map to_string,
 
@@ -49,13 +66,6 @@ def loop (funcs : list (irc_text → list irc_text))
 
   pure ()
 
-structure bot :=
-(nickname : string)
-(ident : string)
-(server : string)
-(port : string)
-(funcs : list (irc_text → list irc_text))
-
 def mk_bot (bt : bot) : io unit := do
   proc ← io.proc.spawn { cmd := network_provider,
                          args := [bt.server, bt.port],
@@ -69,7 +79,7 @@ def mk_bot (bt : bot) : io unit := do
     "https://leanprover.github.io/ 1 :A bot written in Lean \n",
   out $ sformat! "NICK {bt.nickname} \n",
 
-  io.forever $ loop bt.funcs proc,
+  io.forever $ loop bt proc,
   io.put_str "* OK"
 
 end effects

@@ -7,16 +7,38 @@ namespace parsing
 open types
 open parser
 
+def LF := ch $ char.of_nat 10
+def CR := ch $ char.of_nat 13
+
+def Nl := CR >> LF <|> LF <|> CR
+
+def date_format : string := "+%Y.%m.%d %H:%M:%S,%N"
+
+def Numeral : parser char :=
+sat $ λ c, list.any "0123456789".to_list (= c)
+def Number := many_char1 Numeral
+
+def DateParser : parser date := do
+  year ← Number, ch '.',
+  month ← Number, ch '.',
+  day ← Number, ch ' ',
+  hour ← Number, ch ':',
+  minute ← Number, ch ':',
+  seconds ← Number, ch ',',
+  nanoseconds ← Number, optional Nl,
+  pure { year := year.to_nat,
+         month := month.to_nat,
+         day := day.to_nat,
+         hour := hour.to_nat,
+         minute := minute.to_nat,
+         seconds := seconds.to_nat,
+         nanoseconds := nanoseconds.to_nat }
+
 def WordChar : parser char := sat (≠ ' ')
 
 def Ws : parser unit :=
 decorate_error "<whitespace>" $
 many' $ one_of' " \t\x0d".to_list
-
-def LF := ch $ char.of_nat 10
-def CR := ch $ char.of_nat 13
-
-def Nl := CR >> LF <|> LF <|> CR
 
 def Word : parser string := many_char1 WordChar <* Ws
 

@@ -1,3 +1,5 @@
+import system.io
+
 namespace types
 
 inductive message : Type
@@ -44,5 +46,27 @@ match it with
 | (irc_text.parsed_normal v) := to_string v
 | (irc_text.ping server) := sformat! "PONG :{server}"
 end⟩
+
+structure date :=
+(year : nat)
+(month : nat)
+(day : nat)
+(hour : nat)
+(minute : nat)
+(seconds : nat)
+(nanoseconds : nat)
+
+def null_date : date :=
+  { year := 0, month := 0,
+    day := 0, hour := 0,
+    minute := 0, seconds := 0,
+    nanoseconds := 0 }
+
+structure bot :=
+(nickname : string)
+(ident : string)
+(server : string)
+(port : string)
+(funcs : list (irc_text → list irc_text))
 
 end types

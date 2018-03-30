@@ -67,6 +67,6 @@ structure bot :=
 (ident : string)
 (server : string)
 (port : string)
-(funcs : list (irc_text → list irc_text))
+(funcs : list $ io irc_text → io (list irc_text))
 
 end types

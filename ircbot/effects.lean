@@ -35,6 +35,13 @@ def wrapped_put (h : io.handle) (s : string) : io unit := do
   io.fs.flush h,
   io.put_str $ sformat! "+ {s}"
 
+def sequence_applicative {f : Type → Type} [applicative f] {α : Type} :
+  list (f α) → f (list α)
+| [] := pure []
+| (x :: xs) := (::) <$> x <*> sequence_applicative xs
+
+def application {α β : Type} (f : α → β) (a : α) := f a
+
 def loop (bt : bot)
          (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
@@ -44,18 +51,17 @@ def loop (bt : bot)
   else pure (),
 
   let maybe_normal := run_string NormalMessage line,
-  let return_messages : list string :=
-    let text :=
-      match maybe_normal with
-      | (sum.inr v) := v
-      | _ := irc_text.raw_text line
-      end in
-    list.map (λ (f : irc_text → list irc_text), f text)
-             bt.funcs &
-    list.join &
-    list.map to_string,
+  let text :=
+    match maybe_normal with
+    | (sum.inr v) := v
+    | _ := irc_text.raw_text line
+    end,
 
-  list.map (wrapped_put proc.stdin) return_messages &
+  messages ← list.map (flip application $ pure text) bt.funcs &
+             sequence_applicative &
+             functor.map list.join,
+
+  list.map (wrapped_put proc.stdin) (list.map to_string messages) &
   list.foldl (>>) (pure ()),
 
   let maybe_ping := run_string Ping line,

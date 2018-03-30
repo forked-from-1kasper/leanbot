@@ -64,6 +64,7 @@ def my_bot : bot :=
   ident := ident,
   server := server,
   port := port,
-  funcs := [join_at_start, ping_pong] }
+  funcs := [functor.map join_at_start,
+            functor.map ping_pong] }
 
 def main := mk_bot my_bot

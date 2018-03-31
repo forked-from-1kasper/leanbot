@@ -12,6 +12,25 @@ begin
   intros contra, cases contra
 end
 
+def print_date (d : date) (input : irc_text) : list irc_text :=
+match input with
+| irc_text.parsed_normal
+  { object := some ~nick!ident, type := message.privmsg,
+    subject := subject, text := "\\date" } :=
+  let new_subject :=
+    if subject.front = '#' then subject else nick in
+  [privmsg new_subject $ sformat! "It's now {d.hour}:{d.minute}"]
+| _ := []
+end
+
+def print_date_io (dirty_input : io irc_text) : io (list irc_text) := do
+  d ← get_date,
+  input ← dirty_input,
+  match d with
+  | some v := pure $ print_date v input
+  | none := pure []
+  end
+
 def join_at_start (input : irc_text) : list irc_text :=
 match input with
 | irc_text.parsed_normal v :=
@@ -65,6 +84,7 @@ def my_bot : bot :=
   server := server,
   port := port,
   funcs := [functor.map join_at_start,
-            functor.map ping_pong] }
+            functor.map ping_pong,
+            print_date_io] }
 
 def main := mk_bot my_bot

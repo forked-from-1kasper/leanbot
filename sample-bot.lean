@@ -31,15 +31,17 @@ def print_date_io (dirty_input : io irc_text) : io (list irc_text) := do
   | none := pure []
   end
 
-def join_at_start (input : irc_text) : list irc_text :=
+def messages : list irc_text :=
+  [join "#borsch",
+   privmsg "#borsch" "Black magic is here!",
+   mode bot_nickname "+B"]
+
+def at_start (messages : list irc_text) (input : irc_text) : list irc_text :=
 match input with
 | irc_text.parsed_normal v :=
   if v.type = message.mode ∧
      v.text = "+x" ∧
-     v.subject = bot_nickname then
-     [join "#borsch",
-      privmsg "#borsch" "Black magic is here!",
-      mode bot_nickname "+B"]
+     v.subject = bot_nickname then messages
   else []
 | _ := []
 end
@@ -83,7 +85,7 @@ def my_bot : bot :=
   ident := ident,
   server := server,
   port := port,
-  funcs := [functor.map join_at_start,
+  funcs := [functor.map $ at_start messages,
             functor.map ping_pong,
             print_date_io] }
 

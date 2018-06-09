@@ -1,6 +1,6 @@
 import data.buffer.parser
 import ircbot ircbot.base64
-import ircbot.modules.ping_pong ircbot.modules.print_date ircbot.modules.help
+import ircbot.modules
 
 open types effects support parsing login
 open parser
@@ -28,6 +28,7 @@ def my_funcs (acc : account) : list bot_function :=
   [modules.ping_pong.ping_pong,
    sasl my_bot_info messages acc,
    modules.print_date.print_date,
+   modules.admin.join_channel,
    relogin]
 
 def my_bot (acc : account) : bot :=

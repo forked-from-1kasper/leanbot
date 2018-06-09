@@ -10,7 +10,8 @@ match input with
     args := [subject], text := "\\date" } :=
   let new_subject :=
     if subject.front = '#' then subject else nick in
-  [privmsg new_subject $ sformat! "It's {d.hour}:{d.minute}, {d.day}.{d.month} now."]
+  [privmsg new_subject $ sformat!
+     "It's {d.hour}:{d.minute}, {d.day} day, {d.month} month now."]
 | _ := []
 end
 

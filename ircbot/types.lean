@@ -83,9 +83,20 @@ structure bot_info :=
 (server : string)
 (port : string)
 
+structure bot_function :=
+(name : string)
+(syntax : option string)
+(description : string)
+(func : io irc_text → io (list irc_text))
+
+instance bot_function.has_to_string : has_to_string bot_function :=
+⟨λ it,
+let syntax := option.get_or_else it.syntax "<none>" in
+sformat! "name: {it.name}; syntax: {syntax}; description: {it.description}"⟩ 
+
 structure bot :=
 (info : bot_info)
-(funcs : list $ io irc_text → io (list irc_text))
+(funcs : list bot_function)
 
 structure server_says :=
 (server : string)

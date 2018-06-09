@@ -10,7 +10,7 @@ def login_messages (nick : string) (ident : string) :=
      "https://leanprover.github.io/ 1 :A bot written in Lean \n",
    irc_text.raw_text $ sformat! "NICK {nick} \n"]
 
-def relogin (input : irc_text) : list irc_text :=
+def relogin_func (input : irc_text) : list irc_text :=
 match input with
 | irc_text.parsed_normal
   { object := some _, type := message.kick,
@@ -18,6 +18,12 @@ match input with
     [join channel]
 | _ := []
 end
+
+def relogin : bot_function :=
+  { name := "relogin",
+    syntax := none,
+    description := "Autorelogin when kicked",
+    func := functor.map relogin_func }
 
 def no_login (nick : string) (messages : list irc_text) (input : irc_text) : list irc_text :=
 match input with
@@ -29,7 +35,7 @@ match input with
 | _ := []
 end
 
-def sasl (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
+def sasl_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.raw_text "AUTHENTICATE +") :=
   [irc_text.raw_text $ sformat! "AUTHENTICATE {acc.get_hash}\n"]
 | (irc_text.raw_text v) :=
@@ -48,5 +54,11 @@ def sasl (info : bot_info) (messages : list irc_text) (acc : account) : irc_text
   | _ := []
   end
 | _ := []
+
+def sasl (info : bot_info) (messages : list irc_text) (acc : account) : bot_function :=
+  { name := "SASL authentication",
+    syntax := none,
+    description := sformat! "Sign in to {acc.login} account.",
+    func := functor.map $ sasl_func info messages acc }
 
 end login

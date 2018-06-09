@@ -58,7 +58,8 @@ def loop (bt : bot)
     | _ := irc_text.raw_text $ string.trim_nl line
     end,
 
-  messages ← list.map (flip application $ pure text) bt.funcs &
+  messages ← list.map (flip application $ pure text)
+                      (list.map bot_function.func bt.funcs) &
              sequence_applicative &
              functor.map list.join,
 

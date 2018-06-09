@@ -1,5 +1,6 @@
 import data.buffer.parser
-import ircbot ircbot.base64 ircbot.modules.ping_pong ircbot.modules.print_date
+import ircbot ircbot.base64
+import ircbot.modules.ping_pong ircbot.modules.print_date ircbot.modules.help
 
 open types effects support parsing login
 open parser
@@ -23,12 +24,16 @@ def messages : list irc_text :=
 def my_bot_info : bot_info :=
 bot_info.mk bot_nickname ident server port
 
+def my_funcs (acc : account) : list bot_function :=
+  [modules.ping_pong.ping_pong,
+   sasl my_bot_info messages acc,
+   modules.print_date.print_date,
+   relogin]
+
 def my_bot (acc : account) : bot :=
+let funcs := my_funcs acc in
 { info := my_bot_info,
-  funcs := [functor.map modules.ping_pong.ping_pong,
-            functor.map (sasl my_bot_info messages acc),
-            modules.print_date.print_date_io,
-            functor.map relogin] }
+  funcs := modules.help.help funcs :: funcs }
 
 def main := do
   args ← io.cmdline_args,

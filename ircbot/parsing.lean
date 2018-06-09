@@ -24,7 +24,7 @@ def date_format : string := "+%Y.%m.%d %H:%M:%S,%N"
 
 def Numeral : parser char :=
 sat $ λ c, list.any "0123456789".to_list (= c)
-def Number := many_char1 Numeral
+def Number := many_char1 Numeral >>= pure ∘ string.to_nat
 
 def DateParser : parser date := do
   year ← Number, ch '.',
@@ -34,13 +34,7 @@ def DateParser : parser date := do
   minute ← Number, ch ':',
   seconds ← Number, ch ',',
   nanoseconds ← Number, optional Nl,
-  pure { year := year.to_nat,
-         month := month.to_nat,
-         day := day.to_nat,
-         hour := hour.to_nat,
-         minute := minute.to_nat,
-         seconds := seconds.to_nat,
-         nanoseconds := nanoseconds.to_nat }
+  pure $ date.mk year month day hour minute seconds nanoseconds
 
 def whitespaces := " \t\x0d".to_list
 
@@ -96,16 +90,14 @@ def NormalMessage : parser irc_text := do
   ch ':',
   text ← decorate_error "<text>" $ FreeWord,
   optional Nl,
-  pure $ irc_text.parsed_normal
-    { object := some object, type := type,
-      args := args, text := text }
+  pure (irc_text.parsed_normal $
+    normal_message.mk (some object) type args text)
 
 def LoginWords : parser server_says := do
   ch ':', server ← NarrowWord, Ws,
   status ← NarrowWord, Ws, ch '*', Ws,
   args ← many (NarrowWord <* Ws),
   message ← optional (ch ':' >> FreeWord),
-  pure { server := server, status := status,
-         args := args, message := message }
+  pure $ server_says.mk server status args message
 
 end parsing

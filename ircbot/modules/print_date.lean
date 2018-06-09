@@ -1,5 +1,5 @@
-import ircbot.types ircbot.effects ircbot.support
-open types effects support
+import ircbot.types ircbot.effects ircbot.support ircbot.datetime
+open types effects support datetime
 
 namespace modules.print_date
 
@@ -11,7 +11,7 @@ match input with
   let new_subject :=
     if subject.front = '#' then subject else nick in
   [privmsg new_subject $ sformat!
-     "It's {d.hour}:{d.minute}, {d.day} day, {d.month} month now."]
+     "It's {d.hour}:{d.minute}, {d.day} {to_string d.month}, {d.weekday} now."]
 | _ := []
 end
 

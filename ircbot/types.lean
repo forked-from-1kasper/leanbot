@@ -54,21 +54,6 @@ end⟩
 instance irc_text.has_repr : has_repr irc_text :=
 ⟨λ it, to_string it⟩
 
-structure date :=
-(year : nat)
-(month : nat)
-(day : nat)
-(hour : nat)
-(minute : nat)
-(seconds : nat)
-(nanoseconds : nat)
-
-def null_date : date :=
-  { year := 0, month := 0,
-    day := 0, hour := 0,
-    minute := 0, seconds := 0,
-    nanoseconds := 0 }
-
 structure account :=
 (login : string)
 (password : string)

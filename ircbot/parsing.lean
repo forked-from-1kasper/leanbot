@@ -1,10 +1,10 @@
 import data.buffer.parser
 
-import ircbot.types
+import ircbot.types ircbot.datetime
 
 namespace parsing
 
-open types
+open types datetime
 open parser
 
 def lf := char.of_nat 10
@@ -15,26 +15,16 @@ def CR := ch cr
 
 def Nl := CR >> LF <|> LF <|> CR
 
+def date_format : string := "+%Y.%m.%d %H:%M:%S,%N %u"
+
 namespace string
   def trim_sym (c : char) (s : string) := if s.back = c then string.pop_back s else s
   def trim_nl := trim_sym cr ∘ trim_sym lf
 end string
 
-def date_format : string := "+%Y.%m.%d %H:%M:%S,%N"
-
 def Numeral : parser char :=
 sat $ λ c, list.any "0123456789".to_list (= c)
 def Number := many_char1 Numeral >>= pure ∘ string.to_nat
-
-def DateParser : parser date := do
-  year ← Number, ch '.',
-  month ← Number, ch '.',
-  day ← Number, ch ' ',
-  hour ← Number, ch ':',
-  minute ← Number, ch ':',
-  seconds ← Number, ch ',',
-  nanoseconds ← Number, optional Nl,
-  pure $ date.mk year month day hour minute seconds nanoseconds
 
 def whitespaces := " \t\x0d".to_list
 
@@ -53,6 +43,40 @@ def Word : parser string := many_char1 WordChar <* Ws
 def FreeWord : parser string := many_char1 $ sat (λ c, c ≠ lf ∧ c ≠ cr)
 
 def tok (s : string) := str s >> Ws
+
+def DayOfWeekParser : parser day_of_week :=
+(tok "1" >> pure day_of_week.monday) <|>
+(tok "2" >> pure day_of_week.tuesday) <|>
+(tok "3" >> pure day_of_week.wednesday) <|>
+(tok "4" >> pure day_of_week.thursday) <|>
+(tok "5" >> pure day_of_week.friday) <|>
+(tok "6" >> pure day_of_week.saturday) <|>
+(tok "7" >> pure day_of_week.sunday)
+
+def MonthParser : parser month :=
+(tok "01"  >> pure month.jan) <|>
+(tok "02" >> pure month.feb) <|>
+(tok "03" >> pure month.mar) <|>
+(tok "04" >> pure month.apr) <|>
+(tok "05" >> pure month.may) <|>
+(tok "06" >> pure month.jun) <|>
+(tok "07" >> pure month.jul) <|>
+(tok "08" >> pure month.aug) <|>
+(tok "09" >> pure month.sep) <|>
+(tok "10" >> pure month.oct) <|>
+(tok "11" >> pure month.nov) <|>
+(tok "12" >> pure month.dec)
+
+def DateParser : parser date := do
+  year ← Number, ch '.',
+  month ← MonthParser, ch '.',
+  day ← Number, ch ' ',
+  hour ← Number, ch ':',
+  minute ← Number, ch ':',
+  seconds ← Number, ch ',',
+  nanoseconds ← Number, ch ' ',
+  weekday ← DayOfWeekParser, optional Nl,
+  pure $ date.mk year month day hour minute seconds nanoseconds weekday
 
 def MessageType : parser message :=
 (tok "NOTICE" >> return message.notice) <|>

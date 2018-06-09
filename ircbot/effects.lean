@@ -1,12 +1,12 @@
 import system.io
 import data.buffer.parser
 
-import ircbot.types ircbot.parsing ircbot.support ircbot.unicode
+import ircbot.types ircbot.parsing ircbot.support ircbot.unicode ircbot.datetime
 
 namespace effects
 
 open parser
-open parsing types support
+open parsing types support datetime
 
 notation x `&` f := f x
 

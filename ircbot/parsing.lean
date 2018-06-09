@@ -7,10 +7,18 @@ namespace parsing
 open types
 open parser
 
-def LF := ch $ char.of_nat 10
-def CR := ch $ char.of_nat 13
+def lf := char.of_nat 10
+def cr := char.of_nat 13
+
+def LF := ch lf
+def CR := ch cr
 
 def Nl := CR >> LF <|> LF <|> CR
+
+namespace string
+  def trim_sym (c : char) (s : string) := if s.back = c then string.pop_back s else s
+  def trim_nl := trim_sym cr ∘ trim_sym lf
+end string
 
 def date_format : string := "+%Y.%m.%d %H:%M:%S,%N"
 
@@ -34,13 +42,21 @@ def DateParser : parser date := do
          seconds := seconds.to_nat,
          nanoseconds := nanoseconds.to_nat }
 
+def whitespaces := " \t\x0d".to_list
+
 def WordChar : parser char := sat (≠ ' ')
+
+def NarrowWordChar : parser char :=
+sat (λ c, list.all (whitespaces ++ [':', '*']) (≠ c))
+def NarrowWord := many_char1 NarrowWordChar
 
 def Ws : parser unit :=
 decorate_error "<whitespace>" $
-many' $ one_of' " \t\x0d".to_list
+many' $ one_of' whitespaces
 
 def Word : parser string := many_char1 WordChar <* Ws
+
+def FreeWord : parser string := many_char1 $ sat (λ c, c ≠ lf ∧ c ≠ cr)
 
 def tok (s : string) := str s >> Ws
 
@@ -50,6 +66,7 @@ def MessageType : parser message :=
 (tok "MODE" >> return message.mode) <|>
 (tok "QUIT" >> return message.quit) <|>
 (tok "NICK" >> return message.nick) <|>
+(tok "KICK" >> return message.kick) <|>
 (tok "JOIN" >> return message.join)
 
 def PersonIdentified : parser person := do
@@ -72,16 +89,23 @@ def Ping : parser irc_text := do
   pure $ irc_text.ping server
 
 def NormalMessage : parser irc_text := do
-  str ":",
-  object ← Person,
+  ch ':',
+  object ← decorate_error "<person>" $ Person,
   type ← MessageType,
-  subject ← Word,
-  optional $ ch ':',
-  text ← many1 $ sat
-    (λ c, c ≠ char.of_nat 10 ∧ c ≠ char.of_nat 13),
+  args ← decorate_error "<args>" $ many1 (NarrowWord <* Ws),
+  ch ':',
+  text ← decorate_error "<text>" $ FreeWord,
   optional Nl,
   pure $ irc_text.parsed_normal
     { object := some object, type := type,
-      subject := subject, text := text.as_string }
+      args := args, text := text }
+
+def LoginWords : parser server_says := do
+  ch ':', server ← NarrowWord, Ws,
+  status ← NarrowWord, Ws, ch '*', Ws,
+  args ← many (NarrowWord <* Ws),
+  message ← optional (ch ':' >> FreeWord),
+  pure { server := server, status := status,
+         args := args, message := message }
 
 end parsing

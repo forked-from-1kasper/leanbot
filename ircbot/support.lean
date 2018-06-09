@@ -9,20 +9,20 @@ def join (channel : string) : irc_text :=
     { object := none,
       type := message.join,
       text := "",
-      subject := channel }
+      args := [channel] }
 
 def privmsg (subject : string) (text : string) : irc_text :=
   irc_text.parsed_normal
     { object := none,
       type := message.privmsg,
-      text := text,
-      subject := subject }
+      text := ":" ++ text,
+      args := [subject] }
 
 def mode (subject : string) (mode : string) : irc_text :=
   irc_text.parsed_normal
     { object := none,
       type := message.mode,
       text := mode,
-      subject := subject }
+      args := [subject] }
 
 end support

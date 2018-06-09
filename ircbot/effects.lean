@@ -1,7 +1,7 @@
 import system.io
 import data.buffer.parser
 
-import ircbot.types ircbot.parsing ircbot.support
+import ircbot.types ircbot.parsing ircbot.support ircbot.unicode
 
 namespace effects
 
@@ -45,7 +45,8 @@ def application {α β : Type} (f : α → β) (a : α) := f a
 def loop (bt : bot)
          (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
-  let line := buffer.to_string getted_buffer,
+  let line := option.get_or_else
+    (unicode.utf8_to_string getted_buffer) "",
   if line.length > 0 then
     io.put_str $ sformat! "- {line}"
   else pure (),
@@ -54,7 +55,7 @@ def loop (bt : bot)
   let text :=
     match maybe_normal with
     | (sum.inr v) := v
-    | _ := irc_text.raw_text line
+    | _ := irc_text.raw_text $ string.trim_nl line
     end,
 
   messages ← list.map (flip application $ pure text) bt.funcs &
@@ -74,16 +75,11 @@ def loop (bt : bot)
 
 def mk_bot (bt : bot) : io unit := do
   proc ← io.proc.spawn { cmd := network_provider,
-                         args := [bt.server, bt.port],
+                         args := [bt.info.server, bt.info.port],
                          stdin := io.process.stdio.piped,
                          stdout := io.process.stdio.piped },
 
   let out := wrapped_put proc.stdin,
-
-  out $ sformat!
-    "USER {bt.ident} " ++
-    "https://leanprover.github.io/ 1 :A bot written in Lean \n",
-  out $ sformat! "NICK {bt.nickname} \n",
 
   io.forever $ loop bt proc,
   io.put_str "* OK"

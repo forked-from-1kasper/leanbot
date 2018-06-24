@@ -26,6 +26,10 @@ def Numeral : parser char :=
 sat $ λ c, list.any "0123456789".to_list (= c)
 def Number := many_char1 Numeral >>= pure ∘ string.to_nat
 
+def Integer : parser ℤ :=
+int.of_nat <$> Number <|>
+(int.neg ∘ int.of_nat) <$> (ch '-' >> Number)
+
 def whitespaces := " \t\x0d".to_list
 
 def WordChar : parser char := sat (≠ ' ')

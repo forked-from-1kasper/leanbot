@@ -35,6 +35,15 @@ match input with
 | _ := []
 end
 
+def nickserv_login (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
+| (irc_text.parsed_normal v) :=
+  if v.type = message.mode ∧
+     v.text = "+i" ∧
+     v.args = [info.nickname] then (privmsg "NickServ" $
+                sformat! "identify {acc.login} {acc.password}") :: messages
+  else []
+| _ := []
+
 def sasl_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.raw_text "AUTHENTICATE +") :=
   [irc_text.raw_text $ sformat! "AUTHENTICATE {acc.get_hash}\n"]

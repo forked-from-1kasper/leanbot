@@ -5,7 +5,7 @@ open types support parser
 namespace modules.admin
 
 def CorrectIdent := do
-  ch '~', word ← many_char1 $ sat (λ c, c ≠ ' ' ∧ c ≠ '@'),
+  optional (ch '~'), word ← many_char1 $ sat (λ c, c ≠ ' ' ∧ c ≠ '@'),
   ch '@', ip ← sep_by1 (ch '.') parsing.Number,
   pure (word, ip)
 

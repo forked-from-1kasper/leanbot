@@ -14,6 +14,7 @@ match input with
 | _ := []
 end
 
+/-- For testing: send “pong” after “\ping”. -/
 def ping_pong : bot_function :=
   { name := "ping-pong",
     syntax := some "\\ping",

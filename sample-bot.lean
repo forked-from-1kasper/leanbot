@@ -11,25 +11,25 @@ def port : string := "6667"
 
 def ident : string := "lean"
 def bot_nickname : string := "leanbot"
--- constants
+-- end
 
 theorem bot_nickname_is_correct : bot_nickname.front ≠ '#' :=
 begin intros contra, cases contra end
 
 def messages : list irc_text :=
-  [join "#lor",
-   privmsg "#lor" "Lean rulet",
-   mode bot_nickname "+B"]
+  [ join "#lor",
+    privmsg "#lor" "Lean rulet",
+    mode bot_nickname "+B" ]
 
 def my_bot_info : bot_info :=
 bot_info.mk bot_nickname ident server port
 
 def my_funcs (acc : account) : list bot_function :=
-  [modules.ping_pong.ping_pong,
-   sasl my_bot_info messages acc,
-   modules.print_date.print_date,
-   modules.admin.join_channel,
-   relogin]
+  [ modules.ping_pong.ping_pong,
+    sasl my_bot_info messages acc,
+    modules.print_date.print_date,
+    modules.admin.join_channel,
+    relogin ]
 
 def my_bot (acc : account) : bot :=
 let funcs := my_funcs acc in

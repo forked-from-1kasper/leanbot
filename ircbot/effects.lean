@@ -10,9 +10,10 @@ open parsing types support datetime
 
 notation x `&` f := f x
 
-def network_provider : string := "nc"
+private def network_provider : string := "nc"
+private def date_provider := "date"
 
-def date_provider := "date"
+/-- Return current date. -/
 def get_date : io $ option date := do
   date_proc ← io.proc.spawn
     { cmd := date_provider,
@@ -30,20 +31,17 @@ def get_date : io $ option date := do
   | _ := pure none
   end
 
-def wrapped_put (h : io.handle) (s : string) : io unit := do
+private def wrapped_put (h : io.handle) (s : string) : io unit := do
   io.fs.put_str h s,
   io.fs.flush h,
   io.put_str $ sformat! "+ {s}"
 
-def sequence_applicative {f : Type → Type} [applicative f] {α : Type} :
+private def sequence_applicative {f : Type → Type} [applicative f] {α : Type} :
   list (f α) → f (list α)
 | [] := pure []
 | (x :: xs) := (::) <$> x <*> sequence_applicative xs
 
-def application {α β : Type} (f : α → β) (a : α) := f a
-
-def loop (bt : bot)
-         (proc : io.proc.child) : io unit := do
+private def loop (bt : bot) (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
   let line := option.get_or_else
     (unicode.utf8_to_string getted_buffer) "",
@@ -58,7 +56,7 @@ def loop (bt : bot)
     | _ := irc_text.raw_text $ string.trim_nl line
     end,
 
-  messages ← list.map (flip application $ pure text)
+  messages ← list.map (flip function.app (pure text))
                       (list.map bot_function.func bt.funcs) &
              sequence_applicative &
              functor.map list.join,
@@ -74,6 +72,7 @@ def loop (bt : bot)
 
   pure ()
 
+/-- Run a bot. -/
 def mk_bot (bt : bot) : io unit := do
   proc ← io.proc.spawn { cmd := network_provider,
                          args := [bt.info.server, bt.info.port],

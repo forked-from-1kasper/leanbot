@@ -11,6 +11,7 @@ def join (channel : string) : irc_text :=
       text := "",
       args := [channel] }
 
+/-- Return irc_text.parsed_normal message with “:” in start of message. -/
 def privmsg (subject : string) (text : string) : irc_text :=
   irc_text.parsed_normal
     { object := none,

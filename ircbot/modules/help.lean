@@ -13,6 +13,7 @@ match input with
 | _ := []
 end
 
+/-- Autogenerate and print loaded modules list. -/
 def help (funcs : list bot_function) : bot_function :=
   { name := "help",
     syntax := some "\\help",

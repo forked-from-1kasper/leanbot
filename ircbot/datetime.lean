@@ -5,14 +5,8 @@ inductive day_of_week
 | thursday | friday
 | saturday | sunday
 
-def day_of_week.to_nat : day_of_week → ℕ
-| day_of_week.monday := 1
-| day_of_week.tuesday := 2
-| day_of_week.wednesday := 3
-| day_of_week.thursday := 4
-| day_of_week.friday := 5
-| day_of_week.saturday := 6
-| day_of_week.sunday := 7
+def day_of_week.to_nat (dow : day_of_week) : ℕ :=
+day_of_week.rec_on dow 1 2 3 4 5 6 7
 
 inductive month
 | jan | feb | mar
@@ -20,41 +14,27 @@ inductive month
 | jul | aug | sep
 | oct | nov | dec
 
-def month.to_nat : month → ℕ
-| month.jan := 1 | month.feb := 2  | month.mar := 3
-| month.apr := 4 | month.may := 5  | month.jun := 6
-| month.jul := 7 | month.aug := 8  | month.sep := 9
-| month.oct := 9 | month.nov := 10 | month.dec := 12
+def month.to_nat (m : month) : ℕ :=
+month.rec_on m 1 2 3 4 5 6 7 8 9 10 11 12
 
 instance month.has_to_string : has_to_string month :=
-⟨λ m, match m with
-| month.jan := "January" 
-| month.feb := "February"
-| month.mar := "March"
-| month.apr := "April"
-| month.may := "May"
-| month.jun := "June"
-| month.jul := "July"
-| month.aug := "August"
-| month.sep := "September"
-| month.oct := "October"
-| month.nov := "November"
-| month.dec := "December"
-end⟩
+⟨λ m,
+month.rec_on m
+  "January" "February" "March"
+  "April" "May" "June"
+  "July" "August" "September"
+  "October" "November" "December"⟩
 
 instance month.has_repr : has_repr month :=
 ⟨to_string⟩
 
 instance day_of_week.has_to_string : has_to_string day_of_week :=
-⟨λ d, match d with
-| day_of_week.monday := "Monday"
-| day_of_week.tuesday := "Tuesday"
-| day_of_week.wednesday := "Wednesday"
-| day_of_week.thursday := "Thursday"
-| day_of_week.friday := "Friday"
-| day_of_week.saturday := "Saturday"
-| day_of_week.sunday := "Sunday"
-end⟩
+⟨λ d,
+day_of_week.rec_on d
+  "Monday" "Tuesday"
+  "Wednesday" "Thursday"
+  "Friday" "Saturday"
+  "Sunday"⟩
 
 instance day_of_week.has_repr : has_repr day_of_week :=
 ⟨to_string⟩

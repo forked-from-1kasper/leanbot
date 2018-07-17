@@ -10,8 +10,11 @@ match input with
     args := [subject], text := "\\date" } :=
   let new_subject :=
     if subject.front = '#' then subject else nick in
+  let leading_zero (n : nat) :=
+  if n ≥ 10 then to_string n else "0" ++ (to_string n) in
   [privmsg new_subject $ sformat!
-     "It's {d.hour}:{d.minute}, {d.day} {to_string d.month}, {d.weekday} now."]
+     ("It's {leading_zero d.hour}:{leading_zero d.minute}, " ++
+      "{d.day} {to_string d.month}, {d.weekday} now.")]
 | _ := []
 end
 

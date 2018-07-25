@@ -4,7 +4,7 @@ I’m using Lean version 3.4.0, commit 4be96eaaaf71. If you are using older vers
 
 Also `netcat` is needed. You can try to configure the start using telnet, but I do not guarantee the functionality.
 
-I designed and tested this on Fedora Linux 27 and Ubuntu 17.10. On macOS, this should also work, because this is also a UNIX-like system. On Windows, you can try using cygwin.
+I designed and tested this on Fedora Linux 27 and Ubuntu 18.04. On macOS, this should also work, because this is also a UNIX-like system. On Windows, you can try using cygwin.
 
 # Running
 

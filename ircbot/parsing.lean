@@ -37,7 +37,7 @@ def WordChar : parser char := sat (≠ ' ')
 def NarrowWordChar : parser char :=
 sat (λ c, list.all (whitespaces ++ [':', '*']) (≠ c))
 def NarrowWord := many_char1 NarrowWordChar
-def WordNotNl := many_char1 $ sat (λ c, list.all whitespaces (≠ c))
+def WordNotNl := many_char1 $ sat (λ c, list.all [lf, cr] (≠ c))
 
 def Ws : parser unit :=
 decorate_error "<whitespace>" $

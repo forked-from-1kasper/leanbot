@@ -1,7 +1,7 @@
 namespace datetime
 
 inductive day_of_week
-| monday | tuesday | wednesday
+| monday   | tuesday | wednesday
 | thursday | friday
 | saturday | sunday
 

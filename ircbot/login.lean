@@ -16,7 +16,7 @@ match input with
 | irc_text.parsed_normal
   { object := some _, type := message.kick,
     args := [channel, who], text := _ } :=
-    [ join channel ]
+  [ join channel ]
 | _ := []
 end
 
@@ -42,7 +42,7 @@ def no_login (info : bot_info) (messages : list irc_text) : bot_function :=
   { name := "NickServ authentication",
     syntax := none,
     description := sformat! "Send some messages on start.",
-    func := functor.map $ no_login_func info.nickname messages }
+    func := functor.map (no_login_func info.nickname messages) }
 
 def nickserv_login_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.parsed_normal v) :=
@@ -58,22 +58,22 @@ def nickserv (info : bot_info) (messages : list irc_text) (acc : account) : bot_
   { name := "NickServ authentication",
     syntax := none,
     description := sformat! "Sign in to {acc.login} account using NickServ.",
-    func := functor.map $ nickserv_login_func info messages acc }
+    func := functor.map (nickserv_login_func info messages acc) }
 
 def sasl_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.raw_text "AUTHENTICATE +") :=
-  [irc_text.raw_text $ sformat! "AUTHENTICATE {acc.get_hash}\n"]
+  [ irc_text.raw_text $ sformat! "AUTHENTICATE {acc.get_hash}\n" ]
 | (irc_text.raw_text v) :=
   match run_string LoginWords v with
   | (sum.inr { status := "NOTICE", message := some "*** Checking Ident",
                server := _, args := _ }) :=
-    [irc_text.raw_text "CAP REQ :multi-prefix sasl\n"]
+    [ irc_text.raw_text "CAP REQ :multi-prefix sasl\n" ]
   | (sum.inr { status := "CAP", args := ["ACK"],
                message := some "multi-prefix sasl ", server := _ }) :=
-    [irc_text.raw_text "AUTHENTICATE PLAIN\n"]
+    [ irc_text.raw_text "AUTHENTICATE PLAIN\n" ]
   | (sum.inr { status := "903", message := some "SASL authentication successful",
                server := _, args := _ }) :=
-    [irc_text.raw_text "CAP END\n"] ++
+    [ irc_text.raw_text "CAP END\n" ] ++
     login_messages info.nickname info.ident ++
     messages
   | _ := []
@@ -85,6 +85,6 @@ def sasl (info : bot_info) (messages : list irc_text) (acc : account) : bot_func
   { name := "SASL authentication",
     syntax := none,
     description := sformat! "Sign in to {acc.login} account.",
-    func := functor.map $ sasl_func info messages acc }
+    func := functor.map (sasl_func info messages acc) }
 
 end login

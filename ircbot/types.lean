@@ -12,7 +12,7 @@ inductive person : Type
 notation `~` nick `!` ident := person.user nick ident
 
 structure normal_message :=
-(object : option person)
+(object : option person := none)
 (type : message)
 (args : list string)
 (text : string)

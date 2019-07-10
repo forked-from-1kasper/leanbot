@@ -41,7 +41,7 @@ inductive irc_text : Type
 instance normal_message.has_to_string : has_to_string normal_message :=
 ⟨λ s,
 let args := string.join $ list.map (++" ") s.args in
-sformat! "{to_string s.type} {args}{s.text}\n"⟩
+sformat! "{to_string s.type} {args}{s.text}"⟩
 
 instance irc_text.has_to_string : has_to_string irc_text :=
 ⟨λ it,

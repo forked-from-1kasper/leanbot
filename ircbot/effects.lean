@@ -28,9 +28,9 @@ def get_date : io $ option date := do
     (λ _, pure none) (pure ∘ some)
 
 private def wrapped_put (h : io.handle) (s : string) : io unit := do
-  io.fs.put_str h s,
+  io.fs.put_str_ln h (unicode.string_to_utf8 s),
   io.fs.flush h,
-  io.put_str $ sformat! "+ {s}"
+  io.put_str_ln (sformat! "+ {s}")
 
 private def sequence_applicative {f : Type → Type} [applicative f] {α : Type} :
   list (f α) → f (list α)

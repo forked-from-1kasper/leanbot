@@ -27,8 +27,11 @@ def get_date : io $ option date := do
   sum.cases_on (run_string DateParser unparsed)
     (λ _, pure none) (pure ∘ some)
 
-private def wrapped_put (h : io.handle) (s : string) : io unit := do
-  io.fs.put_str_ln h (unicode.string_to_utf8 s),
+private def wrapped_put (h : io.handle) (bt : bot) (s : string) : io unit := do
+  match bt.unicode_output_fix with
+  | ff := io.fs.put_str_ln h s
+  | tt := io.fs.put_str_ln h (unicode.string_to_utf8 s)
+  end,
   io.fs.flush h,
   io.put_str_ln (sformat! "+ {s}")
 
@@ -55,10 +58,10 @@ private def loop (bt : bot) (proc : io.proc.child) : io unit := do
                        (list.map bot_function.func bt.funcs)),
 
   list.foldl (>>) (pure ()) $
-  list.map (wrapped_put proc.stdin) (list.map to_string messages),
+  list.map (wrapped_put proc.stdin bt) (list.map to_string messages),
 
   sum.cases_on (run_string Ping line)
-    (λ _, pure ()) (wrapped_put proc.stdin ∘ to_string)
+    (λ _, pure ()) (wrapped_put proc.stdin bt ∘ to_string)
 
 /-- Run a bot. -/
 def mk_bot (bt : bot) : io unit := do

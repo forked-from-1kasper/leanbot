@@ -82,6 +82,7 @@ sformat! "name: {it.name}; syntax: {syntax}; description: {it.description}"⟩
 structure bot :=
 (info : bot_info)
 (funcs : list bot_function)
+(unicode_output_fix := tt)
 
 structure server_says :=
 (server : string)

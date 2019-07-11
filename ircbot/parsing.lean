@@ -108,7 +108,7 @@ PersonIdentified <|> PersonUnidentified
 def Ping : parser irc_text := do
   tok "PING",
   optional $ ch ':',
-  server ← NarrowWord, optional Nl,
+  server ← WordNotNl, optional Nl,
   pure $ irc_text.ping server
 
 def NormalMessage : parser irc_text := do

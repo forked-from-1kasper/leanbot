@@ -32,6 +32,9 @@ private def utf_8_convert_bitvec : list (bitvec 8) → option (list char)
 def utf8_to_string (buff : char_buffer) : option string :=
 list.as_string <$> utf_8_convert_bitvec (list.map (bitvec.of_nat 8 ∘ char.to_nat) buff.to_list)
 
+def get_buffer (buff :char_buffer) : string :=
+option.get_or_else (utf8_to_string buff) ""
+
 private def char_to_unicode (c : ℕ) : list ℕ :=
 -- 0xxxxxxx -- symbols from 0 to 7Fh
 if c ≤ 0x7f then [ c ]

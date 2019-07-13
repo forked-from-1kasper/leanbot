@@ -35,11 +35,6 @@ private def wrapped_put (h : io.handle) (bt : bot) (s : string) : io unit := do
   io.fs.flush h,
   io.put_str_ln (sformat! "+ {s}")
 
-private def sequence_applicative {f : Type → Type} [applicative f] {α : Type} :
-  list (f α) → f (list α)
-| [] := pure []
-| (x :: xs) := (::) <$> x <*> sequence_applicative xs
-
 private def loop (bt : bot) (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
   let line := option.get_or_else
@@ -53,7 +48,7 @@ private def loop (bt : bot) (proc : io.proc.child) : io unit := do
       (λ _, irc_text.raw_text $ string.trim_nl line) id,
 
   messages ← list.join <$>
-             (sequence_applicative $
+             (sequence $
               list.map (flip function.app (pure text))
                        (list.map bot_function.func bt.funcs)),
 

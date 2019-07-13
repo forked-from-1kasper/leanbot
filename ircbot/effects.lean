@@ -35,15 +35,15 @@ private def wrapped_put (h : io.handle) (bt : bot) (s : string) : io unit := do
   io.fs.flush h,
   io.put_str_ln (sformat! "+ {s}")
 
-private def buffer_to_string (bt : bot) (buff : char_buffer) : string :=
-match bt.unicode_fix with
+private def buffer_to_string (unicode_fix : bool) (buff : char_buffer) : string :=
+match unicode_fix with
 | ff := buffer.to_string buff
 | tt := option.get_or_else (unicode.utf8_to_string buff) ""
 end
 
 private def loop (bt : bot) (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
-  let line := buffer_to_string bt getted_buffer,
+  let line := buffer_to_string tt getted_buffer,
   if line.length > 0 then
     io.put_str $ sformat! "- {line}"
   else pure (),

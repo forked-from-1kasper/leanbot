@@ -43,6 +43,10 @@ def Ws : parser unit :=
 decorate_error "<whitespace>" $
 many1 (one_of' whitespaces) >> eps
 
+def Ws' : parser unit :=
+decorate_error "<whitespace or not>" $
+many' (one_of' whitespaces)
+
 def Word : parser string := many_char1 WordChar <* Ws
 
 def FreeWord : parser string := many_char1 $ sat (λ c, c ≠ lf ∧ c ≠ cr)
@@ -115,8 +119,8 @@ def NormalMessage : parser irc_text := do
   ch ':',
   object ← decorate_error "<person>" $ Person,
   type ← MessageType,
-  args ← decorate_error "<args>" $ sep_by1 Ws NarrowWord,
-  text ← decorate_error "<text>" $ optional (Ws >> ch ':' >> FreeWord),
+  args ← decorate_error "<args>" $ many (NarrowWord <* Ws'),
+  text ← decorate_error "<text>" $ optional (ch ':' >> FreeWord),
   optional Nl,
   pure (irc_text.parsed_normal $
     normal_message.mk (some object) type args $
@@ -125,7 +129,7 @@ def NormalMessage : parser irc_text := do
 def LoginWords : parser server_says := do
   ch ':', server ← NarrowWord, Ws,
   status ← NarrowWord, Ws, ch '*', Ws,
-  args ← many (NarrowWord <* Ws),
+  args ← many (NarrowWord <* Ws'),
   message ← optional (ch ':' >> FreeWord),
   pure $ server_says.mk server status args message
 

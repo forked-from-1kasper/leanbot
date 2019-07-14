@@ -116,7 +116,7 @@ def NormalMessage : parser irc_text := do
   object ← decorate_error "<person>" $ Person,
   type ← MessageType,
   args ← decorate_error "<args>" $ sep_by1 Ws NarrowWord,
-  text ← decorate_error "<text>" $ optional (ch ':' >> FreeWord),
+  text ← decorate_error "<text>" $ optional (Ws >> ch ':' >> FreeWord),
   optional Nl,
   pure (irc_text.parsed_normal $
     normal_message.mk (some object) type args $
@@ -125,7 +125,7 @@ def NormalMessage : parser irc_text := do
 def LoginWords : parser server_says := do
   ch ':', server ← NarrowWord, Ws,
   status ← NarrowWord, Ws, ch '*', Ws,
-  args ← sep_by Ws NarrowWord,
+  args ← many1 (NarrowWord <* Ws),
   message ← optional (ch ':' >> FreeWord),
   pure $ server_says.mk server status args message
 

@@ -41,7 +41,7 @@ def WordNotNl := many_char1 $ sat (λ c, list.all [lf, cr] (≠ c))
 
 def Ws : parser unit :=
 decorate_error "<whitespace>" $
-many' $ one_of' whitespaces
+many1 (one_of' whitespaces) >> eps
 
 def Word : parser string := many_char1 WordChar <* Ws
 

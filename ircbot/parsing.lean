@@ -125,7 +125,7 @@ def NormalMessage : parser irc_text := do
 def LoginWords : parser server_says := do
   ch ':', server ← NarrowWord, Ws,
   status ← NarrowWord, Ws, ch '*', Ws,
-  args ← many1 (NarrowWord <* Ws),
+  args ← many (NarrowWord <* Ws),
   message ← optional (ch ':' >> FreeWord),
   pure $ server_says.mk server status args message
 

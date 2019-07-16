@@ -25,7 +25,7 @@ def relogin : bot_function :=
   { name := "relogin",
     syntax := none,
     description := "Autorelogin when kicked",
-    func := functor.map relogin_func }
+    func := pure ∘ relogin_func }
 
 def no_login_func (nick : string) (messages : list irc_text) (input : irc_text) : list irc_text :=
 match input with
@@ -42,7 +42,7 @@ def no_login (info : bot_info) (messages : list irc_text) : bot_function :=
   { name := "NickServ authentication",
     syntax := none,
     description := sformat! "Send some messages on start.",
-    func := functor.map (no_login_func info.nickname messages) }
+    func := pure ∘ no_login_func info.nickname messages }
 
 def nickserv_login_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.parsed_normal v) :=
@@ -58,7 +58,7 @@ def nickserv (info : bot_info) (messages : list irc_text) (acc : account) : bot_
   { name := "NickServ authentication",
     syntax := none,
     description := sformat! "Sign in to {acc.login} account using NickServ.",
-    func := functor.map (nickserv_login_func info messages acc) }
+    func := pure ∘ nickserv_login_func info messages acc }
 
 def sasl_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.raw_text "AUTHENTICATE +") :=
@@ -85,6 +85,6 @@ def sasl (info : bot_info) (messages : list irc_text) (acc : account) : bot_func
   { name := "SASL authentication",
     syntax := none,
     description := sformat! "Sign in to {acc.login} account.",
-    func := functor.map (sasl_func info messages acc) }
+    func := pure ∘ sasl_func info messages acc }
 
 end login

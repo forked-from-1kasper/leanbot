@@ -71,7 +71,7 @@ structure bot_function :=
 (name : string)
 (syntax : option string)
 (description : string)
-(func : io irc_text → io (list irc_text))
+(func : irc_text → io (list irc_text))
 
 instance bot_function.has_to_string : has_to_string bot_function :=
 ⟨λ it,

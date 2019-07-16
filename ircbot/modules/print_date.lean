@@ -18,12 +18,11 @@ match input with
 | _ := []
 end
 
-def print_date_io (dirty_input : io irc_text) : io (list irc_text) := do
-  d ← get_date,
-  input ← dirty_input,
-  match d with
-  | some v := pure $ print_date_func v input
-  | none := pure []
+def print_date_io (input : irc_text) : io (list irc_text) := do
+  date ← get_date,
+  pure $ match date with
+  | some v := print_date_func v input
+  | none := []
   end
 
 def print_date : bot_function :=

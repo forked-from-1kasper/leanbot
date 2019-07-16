@@ -38,6 +38,6 @@ def join_channel : bot_function :=
   { name := "join_channel",
     syntax := "\\join [channel]",
     description := "Join channel. Requires root.",
-    func := functor.map join_channel_func }
+    func := pure ∘ join_channel_func }
 
 end modules.admin

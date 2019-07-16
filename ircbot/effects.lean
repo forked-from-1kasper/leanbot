@@ -54,7 +54,7 @@ private def loop (conf : bot) (proc : io.proc.child) : io unit := do
 
   messages ← list.join <$>
              (sequence $
-              list.map (flip function.app (pure text))
+              list.map (flip function.app text)
                        (list.map bot_function.func conf.funcs)),
 
   list.foldl (>>) (pure ()) $

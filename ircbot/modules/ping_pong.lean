@@ -19,7 +19,7 @@ def ping_pong : bot_function :=
   { name := "ping-pong",
     syntax := some "\\ping",
     description := "ping-pong game!",
-    func := functor.map ping_pong_func }
+    func := pure ∘ ping_pong_func }
 
 theorem ping_pong_is_correct_on_channel (nick ident subject: string)
   (on_channel : subject.front = '#') :

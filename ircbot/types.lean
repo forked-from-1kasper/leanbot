@@ -55,8 +55,7 @@ instance irc_text.has_repr : has_repr irc_text :=
 ⟨λ it, to_string it⟩
 
 structure account :=
-(login : string)
-(password : string)
+(login : string) (password : string)
 
 def account.get_hash (acc : account) :=
 base64.encode $ sformat!
@@ -64,9 +63,9 @@ base64.encode $ sformat!
 
 structure bot_info :=
 (nickname : string)
+(not_channel : nickname.front ≠ '#')
 (ident : string)
-(server : string)
-(port : string)
+(server : string) (port : string)
 
 structure bot_function :=
 (name : string)

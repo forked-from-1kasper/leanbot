@@ -27,8 +27,8 @@ def get_date : io $ option date := do
   sum.cases_on (run_string DateParser unparsed)
     (λ _, pure none) (pure ∘ some)
 
-private def wrapped_put (h : io.handle) (bt : bot) (s : string) : io unit := do
-  match bt.unicode_fix with
+private def wrapped_put (h : io.handle) (conf : bot) (s : string) : io unit := do
+  match conf.unicode_fix with
   | ff := io.fs.put_str_ln h s
   | tt := io.fs.put_str_ln h (unicode.string_to_utf8 s)
   end,
@@ -41,7 +41,7 @@ match unicode_fix with
 | tt := option.get_or_else (unicode.utf8_to_string buff) ""
 end
 
-private def loop (bt : bot) (proc : io.proc.child) : io unit := do
+private def loop (conf : bot) (proc : io.proc.child) : io unit := do
   getted_buffer ← io.fs.get_line proc.stdout,
   let line := buffer_to_string tt getted_buffer,
   if line.length > 0 then
@@ -55,23 +55,23 @@ private def loop (bt : bot) (proc : io.proc.child) : io unit := do
   messages ← list.join <$>
              (sequence $
               list.map (flip function.app (pure text))
-                       (list.map bot_function.func bt.funcs)),
+                       (list.map bot_function.func conf.funcs)),
 
   list.foldl (>>) (pure ()) $
-  list.map (wrapped_put proc.stdin bt) (list.map to_string messages),
+  list.map (wrapped_put proc.stdin conf) (list.map to_string messages),
 
   sum.cases_on (run_string Ping line)
-    (λ _, pure ()) (wrapped_put proc.stdin bt ∘ to_string)
+    (λ _, pure ()) (wrapped_put proc.stdin conf ∘ to_string)
 
 /-- Run a bot. -/
-def mk_bot (bt : bot) : io unit := do
+def mk_bot (conf : bot) : io unit := do
   proc ← io.proc.spawn
     { cmd := network_provider,
-      args := [bt.info.server, bt.info.port],
+      args := [conf.info.server, conf.info.port],
       stdin := io.process.stdio.piped,
       stdout := io.process.stdio.piped },
 
-  io.forever $ loop bt proc,
+  io.forever $ loop conf proc,
   io.put_str "* OK"
 
 end effects

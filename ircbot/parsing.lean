@@ -2,29 +2,50 @@ import data.buffer.parser
 
 import ircbot.types ircbot.datetime
 
+namespace string
+  def lf := char.of_nat 10
+  def cr := char.of_nat 13
+
+  def trim_sym (c : char) (s : string) := if s.back = c then string.pop_back s else s
+  def trim_nl := trim_sym cr ∘ trim_sym lf
+end string
+
+namespace char
+  def is_hex (ch : char) : bool :=
+  list.any (string.to_list "abcdefABCDEF") (= ch)
+end char
+
 namespace parsing
 
 open types datetime
 open parser
 
-def lf := char.of_nat 10
-def cr := char.of_nat 13
-
-def LF := ch lf
-def CR := ch cr
+def LF := ch string.lf
+def CR := ch string.cr
 
 def Nl := CR >> LF <|> LF <|> CR
 
 def date_format : string := "+%Y.%m.%d %H:%M:%S,%N %u"
 
-namespace string
-  def trim_sym (c : char) (s : string) := if s.back = c then string.pop_back s else s
-  def trim_nl := trim_sym cr ∘ trim_sym lf
-end string
+-- ignores non-numerical characters
+private def get_hex_ch (ch : char) : nat :=
+if ch.is_digit then ch.to_nat - '0'.to_nat
+else if ch.is_hex then ch.to_lower.to_nat - 'a'.to_nat + 10
+else 0
 
-def Numeral : parser char :=
-sat $ λ c, list.any "0123456789".to_list (= c)
-def Number := many_char1 Numeral >>= pure ∘ string.to_nat
+private def get_hex_core : string.iterator → nat → nat → nat
+| it 0       r := r
+| it (i + 1) r := get_hex_core it.next i (r * 16 + get_hex_ch it.curr)
+
+def get_hex (s : string) : nat :=
+get_hex_core s.mk_iterator s.length 0
+
+def Numeral : parser char := decorate_error "<digit>" $ sat char.is_digit
+def Number := decorate_error "<number>" (many_char1 Numeral >>= pure ∘ string.to_nat)
+
+def HexCh : parser char := decorate_error "<hex digit>" $
+  sat (λ c, c.is_digit ∨ c.is_hex)
+def HexNumber := decorate_error "<hex number>" (many_char1 HexCh >>= pure ∘ get_hex)
 
 def Integer : parser ℤ :=
 int.of_nat <$> Number <|>
@@ -37,7 +58,7 @@ def WordChar : parser char := sat (≠ ' ')
 def NarrowWordChar : parser char :=
 sat (λ c, list.all (whitespaces ++ [':', '*']) (≠ c))
 def NarrowWord := many_char1 NarrowWordChar
-def WordNotNl := many_char1 $ sat (λ c, list.all [lf, cr] (≠ c))
+def WordNotNl := many_char1 $ sat (λ c, c ≠ string.lf ∧ c ≠ string.cr)
 
 def Ws : parser unit :=
 decorate_error "<whitespace>" $
@@ -48,8 +69,6 @@ decorate_error "<whitespace or not>" $
 many' (one_of' whitespaces)
 
 def Word : parser string := many_char1 WordChar <* Ws
-
-def FreeWord : parser string := many_char1 $ sat (λ c, c ≠ lf ∧ c ≠ cr)
 
 def tok (s : string) := str s >> Ws
 
@@ -120,7 +139,7 @@ def NormalMessage : parser irc_text := do
   object ← decorate_error "<person>" $ Person,
   type ← MessageType,
   args ← decorate_error "<args>" $ many (NarrowWord <* Ws'),
-  text ← decorate_error "<text>" $ optional (ch ':' >> FreeWord),
+  text ← decorate_error "<text>" $ optional (ch ':' >> WordNotNl),
   optional Nl,
   pure (irc_text.parsed_normal $
     normal_message.mk (some object) type args $
@@ -130,7 +149,7 @@ def LoginWords : parser server_says := do
   ch ':', server ← NarrowWord, Ws,
   status ← NarrowWord, Ws, ch '*', Ws,
   args ← many (NarrowWord <* Ws'),
-  message ← optional (ch ':' >> FreeWord),
+  message ← optional (ch ':' >> WordNotNl),
   pure $ server_says.mk server status args message
 
 end parsing

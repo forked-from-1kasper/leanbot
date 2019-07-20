@@ -73,27 +73,27 @@ def Word : parser string := many_char1 WordChar <* Ws
 def tok (s : string) := str s >> Ws
 
 def DayOfWeekParser : parser day_of_week :=
-(tok "1" >> pure day_of_week.monday) <|>
-(tok "2" >> pure day_of_week.tuesday) <|>
-(tok "3" >> pure day_of_week.wednesday) <|>
-(tok "4" >> pure day_of_week.thursday) <|>
-(tok "5" >> pure day_of_week.friday) <|>
-(tok "6" >> pure day_of_week.saturday) <|>
-(tok "7" >> pure day_of_week.sunday)
+(str "1" >> pure day_of_week.monday) <|>
+(str "2" >> pure day_of_week.tuesday) <|>
+(str "3" >> pure day_of_week.wednesday) <|>
+(str "4" >> pure day_of_week.thursday) <|>
+(str "5" >> pure day_of_week.friday) <|>
+(str "6" >> pure day_of_week.saturday) <|>
+(str "7" >> pure day_of_week.sunday)
 
 def MonthParser : parser month :=
-(tok "01"  >> pure month.jan) <|>
-(tok "02" >> pure month.feb) <|>
-(tok "03" >> pure month.mar) <|>
-(tok "04" >> pure month.apr) <|>
-(tok "05" >> pure month.may) <|>
-(tok "06" >> pure month.jun) <|>
-(tok "07" >> pure month.jul) <|>
-(tok "08" >> pure month.aug) <|>
-(tok "09" >> pure month.sep) <|>
-(tok "10" >> pure month.oct) <|>
-(tok "11" >> pure month.nov) <|>
-(tok "12" >> pure month.dec)
+(str "01" >> pure month.jan) <|>
+(str "02" >> pure month.feb) <|>
+(str "03" >> pure month.mar) <|>
+(str "04" >> pure month.apr) <|>
+(str "05" >> pure month.may) <|>
+(str "06" >> pure month.jun) <|>
+(str "07" >> pure month.jul) <|>
+(str "08" >> pure month.aug) <|>
+(str "09" >> pure month.sep) <|>
+(str "10" >> pure month.oct) <|>
+(str "11" >> pure month.nov) <|>
+(str "12" >> pure month.dec)
 
 def DateParser : parser date := do
   year ← Number, ch '.',
@@ -104,7 +104,7 @@ def DateParser : parser date := do
   seconds ← Number, ch ',',
   nanoseconds ← Number, ch ' ',
   weekday ← DayOfWeekParser, optional Nl,
-  pure $ date.mk year month day hour minute seconds nanoseconds weekday
+  pure (date.mk year month day hour minute seconds nanoseconds weekday)
 
 def MessageType : parser message :=
 (tok "NOTICE" >> return message.notice) <|>

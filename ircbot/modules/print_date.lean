@@ -13,7 +13,7 @@ match input with
   let leading_zero (n : nat) :=
   if n ≥ 10 then to_string n else "0" ++ (to_string n) in
   [privmsg new_subject $ sformat!
-     ("It's {leading_zero d.hour}:{leading_zero d.minute}, " ++
+     ("It’s {leading_zero d.hour}:{leading_zero d.minute}, " ++
       "{d.day} {to_string d.month}, {d.weekday} now.")]
 | _ := []
 end

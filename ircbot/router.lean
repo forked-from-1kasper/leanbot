@@ -25,5 +25,3 @@ let p' := parsing.tok ("\\" ++ name) >> p in
       else pure []
     | _ := pure []
     end }
-
-def list.singleton {α : Type} (x : α) : list α := [ x ]

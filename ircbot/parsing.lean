@@ -41,11 +41,11 @@ def get_hex (s : string) : nat :=
 get_hex_core s.mk_iterator s.length 0
 
 def Numeral : parser char := decorate_error "<digit>" $ sat char.is_digit
-def Number := decorate_error "<number>" (many_char1 Numeral >>= pure ∘ string.to_nat)
+def Number := decorate_error "<number>" (string.to_nat <$> many_char1 Numeral)
 
 def HexCh : parser char := decorate_error "<hex digit>" $
   sat (λ c, c.is_digit ∨ c.is_hex)
-def HexNumber := decorate_error "<hex number>" (many_char1 HexCh >>= pure ∘ get_hex)
+def HexNumber := decorate_error "<hex number>" (get_hex <$> many_char1 HexCh)
 
 def Integer : parser ℤ :=
 int.of_nat <$> Number <|>
@@ -72,28 +72,28 @@ def Word : parser string := many_char1 WordChar <* Ws
 
 def tok (s : string) := str s >> Ws
 
+def OrelseEnum {α β : Type} (p : α → parser unit) : list (α × β) → parser β
+| [] := parser.fail "unknown element"
+| ((x, y) :: xs) := (p x >> pure y) <|> OrelseEnum xs
+
 def DayOfWeekParser : parser day_of_week :=
-(str "1" >> pure day_of_week.monday) <|>
-(str "2" >> pure day_of_week.tuesday) <|>
-(str "3" >> pure day_of_week.wednesday) <|>
-(str "4" >> pure day_of_week.thursday) <|>
-(str "5" >> pure day_of_week.friday) <|>
-(str "6" >> pure day_of_week.saturday) <|>
-(str "7" >> pure day_of_week.sunday)
+OrelseEnum str
+  [ ("1", day_of_week.monday),
+    ("2", day_of_week.tuesday),
+    ("3", day_of_week.wednesday),
+    ("4", day_of_week.thursday),
+    ("5", day_of_week.friday),
+    ("6", day_of_week.saturday),
+    ("7", day_of_week.sunday) ]
 
 def MonthParser : parser month :=
-(str "01" >> pure month.jan) <|>
-(str "02" >> pure month.feb) <|>
-(str "03" >> pure month.mar) <|>
-(str "04" >> pure month.apr) <|>
-(str "05" >> pure month.may) <|>
-(str "06" >> pure month.jun) <|>
-(str "07" >> pure month.jul) <|>
-(str "08" >> pure month.aug) <|>
-(str "09" >> pure month.sep) <|>
-(str "10" >> pure month.oct) <|>
-(str "11" >> pure month.nov) <|>
-(str "12" >> pure month.dec)
+OrelseEnum str
+  [ ("01", month.jan), ("02", month.feb),
+    ("03", month.mar), ("04", month.apr),
+    ("05", month.may), ("06", month.jun),
+    ("07", month.jul), ("08", month.aug),
+    ("09", month.sep), ("10", month.oct),
+    ("11", month.nov), ("12", month.dec) ]
 
 def DateParser : parser date := do
   year ← Number, ch '.',
@@ -107,23 +107,21 @@ def DateParser : parser date := do
   pure (date.mk year month day hour minute seconds nanoseconds weekday)
 
 def MessageType : parser message :=
-(tok "NOTICE" >> return message.notice) <|>
-(tok "PRIVMSG" >> return message.privmsg) <|>
-(tok "MODE" >> return message.mode) <|>
-(tok "QUIT" >> return message.quit) <|>
-(tok "NICK" >> return message.nick) <|>
-(tok "KICK" >> return message.kick) <|>
-(tok "JOIN" >> return message.join)
+OrelseEnum tok
+  [ ("NOTICE",  message.notice),
+    ("PRIVMSG", message.privmsg),
+    ("MODE",    message.mode),
+    ("QUIT",    message.quit),
+    ("NICK",    message.nick),
+    ("KICK",    message.kick),
+    ("JOIN",    message.join) ]
 
 def PersonIdentified : parser person := do
   nick ← many_char1 $ sat (λ c, c ≠ ' ' ∧ c ≠ '!'),
-  ch '!',
-  ident ← Word,
-  pure ~nick!ident
+  ch '!', ident ← Word, pure ~nick!ident
 
-def PersonUnidentified : parser person := do
-  var ← Word,
-  pure $ person.unidentified var
+def PersonUnidentified : parser person :=
+person.unidentified <$> Word
 
 def Person : parser person :=
 PersonIdentified <|> PersonUnidentified

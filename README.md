@@ -1,6 +1,6 @@
 # Requirements
 
-I’m using Lean version 3.4.0, commit 4be96eaaaf71. If you are using older versions of Lean (release 3.3.0), this is will not work because of changes in system.io.
+I’m using Lean version 3.6.0 ([community fork](https://github.com/leanprover-community/lean)), commit 9e5e39524bd1. If you are using older versions of Lean (release ≤3.3.0), this is will not work because of changes in system.io.
 
 Also `netcat` is needed. You can try to configure the start using telnet, but I do not guarantee the functionality.
 

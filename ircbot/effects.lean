@@ -13,8 +13,8 @@ structure provider :=
 
 def string.decode (conf : bot) (buff : char_buffer) :=
 match conf.unicode_fix with
-| tt := buffer.to_string buff
-| ff := option.get_or_else (unicode.utf8_to_string buff) ""
+| ff := buffer.to_string buff
+| tt := option.get_or_else (unicode.utf8_to_string buff) ""
 end
 
 def string.encode (conf : bot) (s : string) :=

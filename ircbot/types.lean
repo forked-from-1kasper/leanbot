@@ -78,10 +78,13 @@ instance bot_function.has_to_string : has_to_string bot_function :=
 let syntax := option.get_or_else it.syntax "<none>" in
 sformat! "name: {it.name}; syntax: {syntax}; description: {it.description}"⟩ 
 
+structure streams :=
+(read write : bool)
+
 structure bot :=
 (info : bot_info)
 (funcs : list bot_function)
-(unicode_fix := tt)
+(fix : streams := ⟨ff, ff⟩)
 
 structure server_says :=
 (server : string)

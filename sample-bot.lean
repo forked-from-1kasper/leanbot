@@ -34,8 +34,7 @@ def my_funcs (acc : account) : list bot_function :=
 def my_bot (acc : account) : bot :=
 let funcs := my_funcs acc in
 { info := my_bot_info,
-  funcs := modules.help.help funcs :: funcs,
-  unicode_fix := true }
+  funcs := modules.help.help funcs :: funcs }
 
 def main := do
   args ← io.cmdline_args,

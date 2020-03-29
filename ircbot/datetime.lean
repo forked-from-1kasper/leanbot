@@ -18,36 +18,42 @@ def month.to_nat (m : month) : ℕ :=
 month.rec_on m 1 2 3 4 5 6 7 8 9 10 11 12
 
 instance month.has_to_string : has_to_string month :=
-⟨λ m,
-month.rec_on m
+⟨λ m, month.rec_on m
   "January" "February" "March"
   "April" "May" "June"
   "July" "August" "September"
   "October" "November" "December"⟩
 
 instance month.has_repr : has_repr month :=
-⟨to_string⟩
+⟨λ m, month.rec_on m
+  "jan" "feb" "mar"
+  "apr" "may" "jun"
+  "jul" "aug" "sep"
+  "oct" "nov" "dec"⟩
 
 instance day_of_week.has_to_string : has_to_string day_of_week :=
-⟨λ d,
-day_of_week.rec_on d
-  "Monday" "Tuesday"
+⟨λ d, day_of_week.rec_on d
+  "Monday"    "Tuesday"
   "Wednesday" "Thursday"
-  "Friday" "Saturday"
+  "Friday"    "Saturday"
   "Sunday"⟩
 
 instance day_of_week.has_repr : has_repr day_of_week :=
-⟨to_string⟩
+⟨λ d, day_of_week.rec_on d
+  "monday"    "tuesday"
+  "wednesday" "thursday"
+  "friday"    "saturday"
+  "sunday"⟩
 
 structure date :=
-(year : nat)
-(month : month)
-(day : nat)
-(hour : nat)
-(minute : nat)
-(seconds : nat)
+(year        : nat)
+(month       : month)
+(day         : nat)
+(hour        : nat)
+(minute      : nat)
+(seconds     : nat)
 (nanoseconds : nat)
-(weekday : day_of_week)
+(weekday     : day_of_week)
 
 def null_date : date :=
   { year := 0, month := month.jan,

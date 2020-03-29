@@ -96,14 +96,14 @@ OrelseEnum str
     ("11", month.nov), ("12", month.dec) ]
 
 def DateParser : parser date := do
-  year ← Number, ch '.',
-  month ← MonthParser, ch '.',
-  day ← Number, ch ' ',
-  hour ← Number, ch ':',
-  minute ← Number, ch ':',
-  seconds ← Number, ch ',',
-  nanoseconds ← Number, ch ' ',
-  weekday ← DayOfWeekParser, optional Nl,
+  year        ← Number,      ch '.',
+  month       ← MonthParser, ch '.',
+  day         ← Number,      ch ' ',
+  hour        ← Number,      ch ':',
+  minute      ← Number,      ch ':',
+  seconds     ← Number,      ch ',',
+  nanoseconds ← Number,      ch ' ',
+  weekday     ← DayOfWeekParser, optional Nl,
   pure (date.mk year month day hour minute seconds nanoseconds weekday)
 
 def MessageType : parser message :=

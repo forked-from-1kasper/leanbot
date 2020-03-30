@@ -41,6 +41,6 @@ def main := do
   args ← io.cmdline_args,
   match args with
   | (login :: password :: []) :=
-    mk_bot (my_bot $ account.mk login password)
+    mk_bot (my_bot $ account.mk login password) netcat
   | _ := io.fail "syntax: lean --run file.lean [login] [password]"
   end

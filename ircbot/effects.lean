@@ -34,6 +34,12 @@ def netcat (conf : bot) : io provider := do
            (string.encode conf s) >> io.fs.flush proc.stdin,
          close := io.proc.wait proc >> pure () }
 
+def std (conf : bot) : io provider := do
+  io.put_str_ln "*** DEBUG ***",
+  pure { read  := io.put_str "> " >> (++ "\n") <$> io.get_line,
+         write := function.const string (pure ()),
+         close := pure () }
+
 /-- Return current date. -/
 def get_date : io (option date) := do
   date_proc ← io.proc.spawn
@@ -74,7 +80,7 @@ def mk_bot' (conf : bot) (prov : io provider) : io unit :=
 prov >>= (λ inst, io.forever (loop conf inst) >> io.put_str "* OK" >> inst.close)
 
 /-- Run a bot. -/
-def mk_bot (conf : bot) : io unit :=
-mk_bot' conf (netcat conf)
+def mk_bot (conf : bot) (f : bot → io provider) : io unit :=
+mk_bot' conf (f conf)
 
 end effects

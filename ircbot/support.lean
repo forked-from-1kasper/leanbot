@@ -1,5 +1,8 @@
 import ircbot.types
 
+def list.get {α : Type} [inhabited α] (l : list α) (n : ℕ) : α :=
+list.head (list.drop n l)
+
 def list.singleton {α : Type} (x : α) : list α := [ x ]
 
 namespace string

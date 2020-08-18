@@ -52,4 +52,10 @@ irc_text.parsed_normal
     text := mode,
     args := [subject] }
 
+def matrix (nickname : string) :=
+string.backn nickname "[m]".length = "[m]"
+
+instance : decidable_pred matrix :=
+begin intro s, apply string.has_decidable_eq end
+
 end support

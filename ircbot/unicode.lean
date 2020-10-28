@@ -1,5 +1,5 @@
 import data.buffer system.io
-import data.bitvec
+import ircbot.bitvec
 
 namespace unicode
 

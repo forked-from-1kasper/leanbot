@@ -1,4 +1,4 @@
-import data.bitvec data.buffer
+import ircbot.bitvec data.buffer
 
 namespace base64
 

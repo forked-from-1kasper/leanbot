@@ -33,7 +33,7 @@ if ch.is_digit then ch.to_nat - '0'.to_nat
 else if ch.is_hex then ch.to_lower.to_nat - 'a'.to_nat + 10
 else 0
 
-private def get_hex_core : string.iterator → nat → nat → nat
+private def get_hex_core : string.iterator → ℕ → ℕ → ℕ
 | it 0       r := r
 | it (i + 1) r := get_hex_core it.next i (r * 16 + get_hex_ch it.curr)
 

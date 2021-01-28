@@ -22,7 +22,7 @@ def messages : list irc_text :=
     mode bot_nickname "+B" ]
 
 def my_bot_info : bot_info :=
-bot_info.mk bot_nickname bot_nickname_is_correct ident server port
+bot_info.mk bot_nickname bot_nickname_is_correct ident server port []
 
 def my_funcs (acc : account) : list bot_function :=
   [ modules.ping_pong.ping_pong,

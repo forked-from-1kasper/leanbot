@@ -62,6 +62,7 @@ structure bot_info :=
 (ident       : string)
 (server      : string)
 (port        : string)
+(on_start    : list irc_text := [])
 
 structure bot_function :=
 (name        : string)

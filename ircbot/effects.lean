@@ -60,6 +60,9 @@ private def wrapped_put (prov : provider)
   (s : string) : io unit :=
 prov.write s >> io.put_str_ln (sformat! "+ {s}")
 
+private def send (prov : provider) (messages : list irc_text) := do
+  list.foldl (>>) (pure ()) $ (wrapped_put prov ∘ to_string) <$> messages
+
 private def loop (conf : bot) (prov : provider) : io unit := do
   line ← prov.read,
   if line.length > 0 then
@@ -70,14 +73,16 @@ private def loop (conf : bot) (prov : provider) : io unit := do
     sum.cases_on (run_string NormalMessage line)
       (λ _, irc_text.raw_text line.trim_nl) id,
 
-  messages ← list.join <$> (sequence $ flip bot_function.func text <$> conf.funcs),
-  list.foldl (>>) (pure ()) $ (wrapped_put prov ∘ to_string) <$> messages,
+  messages ← list.join <$> sequence (flip bot_function.func text <$> conf.funcs),
+  send prov messages,
 
   sum.cases_on (run_string Ping line)
     (λ _, pure ()) (wrapped_put prov ∘ to_string)
 
-def mk_bot' (conf : bot) (prov : io provider) : io unit :=
-prov >>= (λ inst, io.forever (loop conf inst) >> io.put_str "* OK" >> inst.close)
+def mk_bot' (conf : bot) (prov : io provider) : io unit := do
+  inst ← prov, send inst conf.info.on_start,
+  io.forever (loop conf inst), io.put_str "* OK",
+  inst.close
 
 /-- Run a bot. -/
 def mk_bot (conf : bot) (f : bot → io provider) : io unit :=

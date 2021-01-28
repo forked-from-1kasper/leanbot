@@ -51,7 +51,7 @@ def Integer : parser ℤ :=
 int.of_nat <$> Number <|>
 (int.neg ∘ int.of_nat) <$> (ch '-' >> Number)
 
-def whitespaces := " \t\x0d".to_list
+def whitespaces := " \t\n\x0d".to_list
 
 def WordChar : parser char := sat (≠ ' ')
 

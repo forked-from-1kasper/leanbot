@@ -31,8 +31,8 @@ def no_login_func (nick : string) (messages : list irc_text) (input : irc_text) 
 match input with
 | irc_text.parsed_normal v :=
   if v.type = message.mode ∧
-     v.text = "+i" ∧
-     v.args = [nick] then messages
+     v.args = [nick, "+i"] then
+     messages
   else []
 | _ := []
 end
@@ -47,9 +47,8 @@ def no_login (info : bot_info) (messages : list irc_text) : bot_function :=
 def nickserv_login_func (info : bot_info) (messages : list irc_text) (acc : account) : irc_text → list irc_text
 | (irc_text.parsed_normal v) :=
   if v.type = message.mode ∧
-     v.text = "+i" ∧
-     v.args = [info.nickname] then (privmsg "NickServ" $
-                sformat! "identify {acc.login} {acc.password}") :: messages
+     v.args = [info.nickname, "+i"] then
+    (privmsg "NickServ" $ sformat! "identify {acc.login} {acc.password}") :: messages
   else []
 | _ := []
 

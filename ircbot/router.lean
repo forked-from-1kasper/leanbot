@@ -1,7 +1,7 @@
 import ircbot.support ircbot.parsing
 open types support parser
 
-def Word := many_char1 parsing.WordChar
+def Word := many_char1 parsing.WordChar <* many' parsing.Ws
 def Words := many_char1 (sat $ function.const char true)
 
 structure speech :=
